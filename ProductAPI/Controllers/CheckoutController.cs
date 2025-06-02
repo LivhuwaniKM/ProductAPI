@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace ProductAPI.Controllers
 {
-    public class CheckoutController(DataContext _db, IResponseHelper _response) : BaseApiController
+    public class CheckoutController(DataContext _db, IResponseHelper _response) : BaseController
     {
         [HttpPost("start")]
         public async Task<ActionResult<ApiResponse<Checkout>>> StartCheckoutAsync(List<CheckoutItem> items)
@@ -18,6 +18,7 @@ namespace ProductAPI.Controllers
             var userId = GetUserId();
 
             var existing = await _db.Checkouts.FirstOrDefaultAsync(c => c.UserId == userId && !c.IsCompleted);
+
             if (existing != null)
                 return _response.CreateResponse<Checkout>(false, 409, "Existing open checkout found.", null);
 
@@ -26,8 +27,10 @@ namespace ProductAPI.Controllers
             foreach (var item in items)
             {
                 var product = await _db.Products.FindAsync(item.ProductId);
+
                 if (product == null)
                     return _response.CreateResponse<Checkout>(false, 404, $"Product ID {item.ProductId} not found.", null);
+
                 if (item.Quantity <= 0 || item.Quantity > product.Quantity)
                     return _response.CreateResponse<Checkout>(false, 400, $"Invalid quantity for product {product.Name}.", null);
 
@@ -87,6 +90,7 @@ namespace ProductAPI.Controllers
             foreach (var item in updatedItems)
             {
                 var product = await _db.Products.FindAsync(item.ProductId);
+
                 if (product == null || item.Quantity <= 0 || item.Quantity > product.Quantity)
                     return _response.CreateResponse<Checkout>(false, 400, $"Invalid item or quantity for product ID {item.ProductId}.", null);
 
@@ -103,19 +107,20 @@ namespace ProductAPI.Controllers
         }
 
         [HttpDelete("delete")]
-        public async Task<ActionResult<ApiResponse<string>>> DeleteCheckoutAsync()
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteCheckoutAsync()
         {
             var userId = GetUserId();
+
             var checkout = await _db.Checkouts
                 .FirstOrDefaultAsync(c => c.UserId == userId && !c.IsCompleted);
 
             if (checkout == null)
-                return _response.CreateResponse<string>(false, 404, "No open checkout to delete.", null);
+                return _response.CreateResponse(false, 404, "No open checkout to delete.", false);
 
             _db.Checkouts.Remove(checkout);
             await _db.SaveChangesAsync();
 
-            return _response.CreateResponse(true, 200, "Checkout deleted.", "Checkout deleted");
+            return _response.CreateResponse(true, 200, "Checkout deleted.", true);
         }
 
         private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace ProductAPI.Controllers
 {
-    public class ProductController(DataContext _db, IResponseHelper _response) : BaseApiController
+    public class ProductController(DataContext _db, IResponseHelper _response) : BaseController
     {
         [HttpPost("create")]
         public async Task<ActionResult<ApiResponse<Product>>> AddProductAsync(Product model)
@@ -26,7 +26,11 @@ namespace ProductAPI.Controllers
         [HttpPut("update/{id}")]
         public async Task<ActionResult<ApiResponse<Product>>> UpdateProductAsync(int id, Product updated)
         {
+            if (id != updated.Id || updated == null)
+                return _response.CreateResponse<Product>(false, 404, "Product not found or access denied.", null);
+
             var product = await _db.Products.FindAsync(id);
+
             if (product == null || product.UserId != GetUserId())
                 return _response.CreateResponse<Product>(false, 404, "Product not found or access denied.", null);
 
@@ -40,22 +44,27 @@ namespace ProductAPI.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        public async Task<ActionResult<ApiResponse<string>>> DeleteProductAsync(int id)
+        public async Task<ActionResult<ApiResponse<bool>>> DeleteProductAsync(int id)
         {
+            if (id <= 0) return _response.CreateResponse(false, 404, "Product not found or access denied.", false);
+
             var product = await _db.Products.FindAsync(id);
+
             if (product == null || product.UserId != GetUserId())
-                return _response.CreateResponse<string>(false, 404, "Product not found or access denied.", null);
+                return _response.CreateResponse(false, 404, "Product not found or access denied.", false);
 
             _db.Products.Remove(product);
+
             await _db.SaveChangesAsync();
 
-            return _response.CreateResponse(true, 200, "Product deleted.", "Product deleted");
+            return _response.CreateResponse(true, 200, "Product deleted.", true);
         }
 
         [HttpGet("list")]
         public async Task<ActionResult<ApiResponse<List<Product>>>> GetAllProductsAsync()
         {
             var products = await _db.Products.ToListAsync();
+
             return _response.CreateResponse(true, 200, "Products retrieved.", products);
         }
 

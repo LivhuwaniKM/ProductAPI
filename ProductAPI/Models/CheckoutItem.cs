@@ -2,7 +2,6 @@
 {
     public class CheckoutItem
     {
-        //[Key]
         public int Id { get; set; }
         public int CheckoutId { get; set; }
         public int ProductId { get; set; }
