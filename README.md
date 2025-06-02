@@ -63,4 +63,6 @@ Run api and open postman
 
 5. Go to ProductAPI/api/Product/create url and create product(s)
 
-6. Go to ProductAPI/api/Checkout/start url and create new checkout
+6. Open DB Beaver or DB Browser for SQlite and open database file which should be in the main project file structure.
+
+7. Go to ProductAPI/api/Checkout/start url and create new checkout
