@@ -19,6 +19,7 @@ A .NET Web API project for managing users, products, and checkout processes.
 2. Run the Project
 
 - Open the project in Visual Studio or your preferred IDE.
+- - PM> Update-database => to run migration [Package Manager]
 - Run the project; it should automatically open Swagger UI in your browser.
 
 3. Export Swagger JSON
