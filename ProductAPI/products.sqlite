@@ -1,0 +1,16 @@
+SELECT * FROM Users
+
+SELECT * FROM Products
+
+SELECT * FROM Checkouts
+
+SELECT * FROM CheckoutItems
+
+
+DELETE FROM Users
+
+DELETE FROM Products
+
+DELETE FROM Checkouts
+
+DELETE FROM CheckoutItems

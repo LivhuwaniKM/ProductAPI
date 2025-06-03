@@ -17,6 +17,7 @@ namespace ProductAPI.Controllers
 
             model.UserId = GetUserId();
 
+            model.Id = 0;
             await _db.Products.AddAsync(model);
             await _db.SaveChangesAsync();
 
