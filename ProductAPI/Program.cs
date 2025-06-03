@@ -1,52 +1,10 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using ProductAPI.Data;
-using ProductAPI.Helpers;
-using System.Text;
+using ProductAPI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddApplicationServices(builder.Configuration);
 
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<DataContext>(options =>
-{
-    options.UseSqlite(builder.Configuration.GetConnectionString("ProductDB"));
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowCorsPolicy", c =>
-    {
-        c.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-    });
-});
-
-builder.Services.AddScoped<IResponseHelper, ResponseHelper>();
-
-builder.Services.AddSingleton<TokenHelper>();
-
-var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!));
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new()
-    {
-        ValidateAudience = true,
-        ValidateIssuer = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = signingKey,
-        RequireExpirationTime = true,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
